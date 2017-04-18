@@ -56,6 +56,17 @@ class Credential(Model):
     modified_date = UTCDateTimeAttribute(default=datetime.now)
     modified_by = UnicodeAttribute()
 
+    @staticmethod
+    def latest_revision(id, revision):
+        i = revision + 1
+        while True:
+            _id = '{0}-{1}'.format(id, i)
+            try:
+                Credential.get(_id)
+            except Credential.DoesNotExist:
+                return i
+            i = i + 1
+
     @property
     def blind(self):
         if (self.data_type.startswith('blind-') or

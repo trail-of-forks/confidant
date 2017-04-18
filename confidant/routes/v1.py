@@ -660,7 +660,7 @@ def update_credential(id):
         return jsonify({'error': msg}), 400
     data = request.get_json()
     update = {}
-    revision = _get_latest_credential_revision(id, _cred.revision)
+    revision = Credential.latest_revision(id, _cred.revision)
     update['name'] = data.get('name', _cred.name)
     if 'enabled' in data:
         if not isinstance(data['enabled'], bool):
@@ -776,28 +776,6 @@ def get_blind_credential(id):
         'modified_date': cred.modified_date,
         'modified_by': cred.modified_by
     })
-
-
-def _get_latest_credential_revision(id, revision):
-    i = revision + 1
-    while True:
-        _id = '{0}-{1}'.format(id, i)
-        try:
-            Credential.get(_id)
-        except Credential.DoesNotExist:
-            return i
-        i = i + 1
-
-
-def _get_latest_blind_credential_revision(id, revision):
-    i = revision + 1
-    while True:
-        _id = '{0}-{1}'.format(id, i)
-        try:
-            Credential.get(_id)
-        except Credential.DoesNotExist:
-            return i
-        i = i + 1
 
 
 @app.route('/v1/archive/blind_credentials/<id>', methods=['GET'])
@@ -956,7 +934,7 @@ def update_blind_credential(id):
         return jsonify({'error': msg}), 400
     data = request.get_json()
     update = {}
-    revision = _get_latest_blind_credential_revision(id, _cred.revision)
+    revision = Credential.latest_revision(id, _cred.revision)
     update['name'] = data.get('name', _cred.name)
     if 'enabled' in data:
         if not isinstance(data['enabled'], bool):
