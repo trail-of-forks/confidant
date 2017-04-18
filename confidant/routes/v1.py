@@ -510,22 +510,6 @@ def _pair_key_conflicts_for_credentials(credential_ids, blind_credential_ids):
     return conflicts
 
 
-def _get_services_for_credential(_id):
-    services = []
-    for service in Service.data_type_date_index.query('service'):
-        if _id in service.credentials:
-            services.append(service)
-    return services
-
-
-def _get_services_for_blind_credential(_id):
-    services = []
-    for service in Service.data_type_date_index.query('service'):
-        if _id in service.blind_credentials:
-            services.append(service)
-    return services
-
-
 def _check_credential_pair_values(credential_pairs):
     for key, val in credential_pairs.iteritems():
         if isinstance(val, dict) or isinstance(val, list):
@@ -600,10 +584,6 @@ def _pair_key_conflicts_for_services(_id, credential_keys, services):
     return conflicts
 
 
-def _lowercase_credential_pairs(credential_pairs):
-    return {i.lower(): j for i, j in credential_pairs.iteritems()}
-
-
 @app.route('/v1/credentials', methods=['POST'])
 @authnz.require_auth
 @authnz.require_csrf_token
@@ -613,8 +593,7 @@ def create_credential():
         return jsonify({'error': 'credential_pairs is a required field'}), 400
     if not isinstance(data.get('metadata', {}), dict):
         return jsonify({'error': 'metadata must be a dict'}), 400
-    # Ensure credential pair keys are lowercase
-    credential_pairs = _lowercase_credential_pairs(data['credential_pairs'])
+    credential_pairs = data['credential_pairs']
     _check, ret = _check_credential_pair_values(credential_pairs)
     if not _check:
         return jsonify(ret), 400
@@ -661,7 +640,7 @@ def create_credential():
 @app.route('/v1/credentials/<id>/services', methods=['GET'])
 @authnz.require_auth
 def get_credential_dependencies(id):
-    services = _get_services_for_credential(id)
+    services = Service.services_for_credential(id)
     _services = [{'id': x.id, 'enabled': x.enabled} for x in services]
     return jsonify({
         'services': _services
@@ -695,12 +674,9 @@ def update_credential(id):
         return jsonify({
             'error': 'credential_keys must be a list.'
         }), 400
-    services = _get_services_for_credential(id)
+    services = Service.services_for_credential(id)
     if 'credential_pairs' in data:
-        # Ensure credential pair keys are lowercase
-        credential_pairs = _lowercase_credential_pairs(
-            data['credential_pairs']
-        )
+        credential_pairs = data['credential_pairs']
         _check, ret = _check_credential_pair_values(credential_pairs)
         if not _check:
             return jsonify(ret), 400
@@ -960,7 +936,7 @@ def create_blind_credential():
 @app.route('/v1/blind_credentials/<id>/services', methods=['GET'])
 @authnz.require_auth
 def get_blind_credential_dependencies(id):
-    services = _get_services_for_blind_credential(id)
+    services = Service.services_for_credential(id)
     _services = [{'id': x.id, 'enabled': x.enabled} for x in services]
     return jsonify({
         'services': _services
@@ -990,7 +966,7 @@ def update_blind_credential(id):
         update['enabled'] = _cred.enabled
     if not isinstance(data.get('metadata', {}), dict):
         return jsonify({'error': 'metadata must be a dict'}), 400
-    services = _get_services_for_blind_credential(id)
+    services = Service.services_for_credential(id)
     if 'credential_pairs' in data:
         for key in ['data_key', 'cipher_type', 'cipher_version']:
             if key not in data:

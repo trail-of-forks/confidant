@@ -118,7 +118,10 @@ class Credential(Model):
         regions = keymanager.get_datakey_regions()
         encrypted_credential_pairs = {}
         encrypted_data_keys = {}
-        _credential_pairs = json.dumps(self.credential_pairs)
+        _credential_pairs = self._lowercase_credential_pairs(
+            self.credential_pairs
+        )
+        _credential_pairs = json.dumps(_credential_pairs)
         for region in regions:
             data_key = keymanager.create_datakey(
                 encryption_context={'id': self.context},
@@ -136,6 +139,10 @@ class Credential(Model):
             )
         self.data_key = json.dumps(encrypted_data_keys)
         self.credential_pairs = json.dumps(encrypted_credential_pairs)
+
+    def _lowercase_credential_pairs(self, credential_pairs):
+        """Lowercase the keys in the passed-in credential_pairs."""
+        return {i.lower(): j for i, j in credential_pairs.iteritems()}
 
     def save(self, *args, **kwargs):
         if not self.blind:

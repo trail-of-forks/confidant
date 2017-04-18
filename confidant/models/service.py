@@ -51,6 +51,14 @@ class Service(Model):
         connection_cls = DDBConnection
         session_cls = DDBSession
 
+    @staticmethod
+    def services_for_credential(id):
+        services = []
+        for service in Service.data_type_date_index.query('service'):
+            if id in service.credentials or id in service.blind_credentials:
+                services.append(service)
+        return services
+
     id = UnicodeAttribute(hash_key=True)
     data_type = UnicodeAttribute()
     data_type_date_index = DataTypeDateIndex()
