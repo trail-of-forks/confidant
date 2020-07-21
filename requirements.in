@@ -80,7 +80,7 @@ python3-saml==1.4.0
 # License: Apache2
 # Upstream url: http://python-requests.org
 # Use: REST calls to external services
-requests==2.11.1
+requests==2.20.0
 
 # Provides enhanced HTTPS support for httplib and urllib2 using PyOpenSSL
 # License: BSD
