@@ -138,7 +138,7 @@ mock==2.0.0
 # License: MIT
 # Upstream url: http://pyyaml.org/wiki/PyYAML
 # Use: For parsing users.yaml
-PyYAML==3.11
+PyYAML==5.1
 
 # License: MIT
 # Upstream url: http://gunicorn.org/
