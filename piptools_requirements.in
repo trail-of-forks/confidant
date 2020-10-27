@@ -3,7 +3,7 @@
 # License: BSD
 # Upstream url: https://github.com/pyca/cryptography
 # Use: For encryption
-cryptography==2.3.0
+cryptography==3.2
 
 # C Foreign Function Interface for Python.
 # License: MIT
